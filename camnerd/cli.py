@@ -14,6 +14,11 @@ app = typer.Typer(help=__doc__, no_args_is_help=True, add_completion=False)
 console = Console()
 
 PathsArg = Annotated[list[Path], typer.Argument(exists=True, help="Image files/folders (analyze also accepts a .csv/.json from extract)")]
+SAVERS = {
+    ".svg": lambda c, p: c.save_svg(str(p), title="camnerd"),
+    ".html": lambda c, p: c.save_html(str(p)),
+    ".txt": lambda c, p: c.save_text(str(p)),
+}
 NoRecursive = Annotated[bool, typer.Option("--no-recursive", help="Don't descend into subfolders")]
 
 
@@ -49,6 +54,7 @@ def extract(
 def analyze(
     paths: PathsArg,
     top: Annotated[int, typer.Option(help="Rows per frequency table")] = 8,
+    save: Annotated[Path | None, typer.Option("--save", help="Also save the report as .svg, .html or .txt")] = None,
     no_recursive: NoRecursive = False,
 ):
     """Report your most frequent camera settings."""
@@ -56,7 +62,13 @@ def analyze(
         df = load(paths, recursive=not no_recursive)
     if df.empty:
         raise typer.Exit("No JPEGs found.")
-    render(df, top=top, console=console)
+    if save and save.suffix.lower() not in SAVERS:
+        raise typer.BadParameter("use a .svg, .html or .txt file", param_hint="--save")
+    out = Console(record=True) if save else console
+    render(df, top=top, console=out)
+    if save:
+        SAVERS[save.suffix.lower()](out, save)
+        console.print(f"[green]✓[/] Saved report → {save}")
 
 
 if __name__ == "__main__":

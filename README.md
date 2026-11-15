@@ -4,6 +4,8 @@ Extract camera metadata from your photos and find out what settings you actually
 
 camnerd reads EXIF, XMP and Fujifilm maker notes from JPEGs, then prints a terminal report of your most frequent settings: gear, exposure, framing, time of day, Fujifilm film-simulation "recipes", and Lightroom edits.
 
+![Overview, gear and exposure sections of the camnerd report](docs/overview.svg)
+
 ## Install
 
 Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/).
@@ -35,6 +37,20 @@ The report covers:
 - **Focus and drive**: focus mode, AF area, drive mode, shutter type, IS
 - **Post-processing**: the editing software used, Lightroom profiles, crops, and which develop sliders you move
 - **Takeaways**: a short plain-English summary of your habits
+
+Settings that never change across your shots are collapsed into a compact "Same in every shot" list, so the bar charts only show the choices you actually vary.
+
+![Fujifilm JPEG settings, favourite recipes and the film sim × dynamic range crosstab](docs/fujifilm.svg)
+
+![Post-processing and takeaways](docs/takeaways.svg)
+
+Save the report as an image or web page with `--save`:
+
+```sh
+uv run camnerd analyze sample_pics/ --save report.svg   # also .html or .txt
+```
+
+The screenshots above are generated from `sample_pics/` with `uv run python docs/screenshots.py`.
 
 ### Extract
 
